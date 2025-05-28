@@ -1,0 +1,313 @@
+Punto 3.C)
+
+Para crear las colecciones:
+
+	db.createCollection("EPS");
+	db.createCollection("IPS");
+	db.createCollection("Afiliado");
+	db.createCollection("ipsServicio");
+	db.createCollection("servicioSalud");
+	db.createCollection("atencionMedica");
+	db.createCollection("especialidad");
+	db.createCollection("medico");
+	db.createCollection("ordenServicio");
+	db.createCollection("cita");
+	db.createCollection("enfermedad");
+	db.createCollection("prestacionServicio");
+	db.createCollection("disponibilidad");
+
+
+Para poblar la base de datos:
+
+db.EPS.insertMany([
+  { idEPS: "EPS001", nombre: "Salud Total", direccion: "Calle 100 #10-20", telefono: "3001234567" },
+  { idEPS: "EPS002", nombre: "Nueva EPS", direccion: "Carrera 15 #45-78", telefono: "3017654321" }
+]);
+
+
+db.IPS.insertMany([
+  { idIPS: "IPS001", idEPS: "EPS001", nombre: "Clínica Norte", NIT: "900123456", direccion: "Calle 80 #20-30", telefono: "3214567890" },
+  { idIPS: "IPS002", idEPS: "EPS002", nombre: "Hospital Central", NIT: "800765432", direccion: "Av. Caracas #30-50", telefono: "3209876543" }
+]);
+
+
+db.servicioSalud.insertMany([
+  { idServicio: "SRV001", nombreServicio: "Consulta General", descripcion: "Consulta médica general", requisitos: "Ninguno" },
+  { idServicio: "SRV002", nombreServicio: "Odontología", descripcion: "Consulta odontológica", requisitos: "Tener cita previa" }
+]);
+
+db.medico.insertMany([
+  { idMedico: "MED001", nombre: "Dra. Ana Pérez", tipoDocumento: "CC", numeroDocumento: "1234567890", idEspecialidad: "ESP001" },
+  { idMedico: "MED002", nombre: "Dr. Juan Ramírez", tipoDocumento: "CC", numeroDocumento: "9876543210", idEspecialidad: "ESP002" }
+]);
+
+db.especialidad.insertMany([
+  { idEspecialidad: "ESP001", nombre: "Medicina General", descripcion: "Atención primaria" },
+  { idEspecialidad: "ESP002", nombre: "Odontología", descripcion: "Salud bucal" }
+]);
+
+db.prestacionServicio.insertMany([
+  { idPrestacion: "PST001", idServicio: "SRV001", idMédico: "MED001", idIPS: "IPS001", horario: "08:00-12:00", cuposDisponibles: 10 },
+  { idPrestacion: "PST002", idServicio: "SRV002", idMédico: "MED002", idIPS: "IPS002", horario: "13:00-17:00", cuposDisponibles: 8 }
+]);
+
+db.disponibilidad.insertMany([
+  { idDisponibilidad: "DISP001", idPrestacion: "PST001", fechaHora: ISODate("2025-06-01T08:00:00Z"), estado: "disponible" },
+  { idDisponibilidad: "DISP002", idPrestacion: "PST002", fechaHora: ISODate("2025-06-01T13:00:00Z"), estado: "reservado" }
+]);
+
+db.Afiliado.insertMany([
+  { idAfiliado: "AF001", idEPS: "EPS001", nombre: "Carlos López", tipoDocumento: "CC", numeroDocumento: "1012345678", fechaNacimiento: ISODate("1990-01-01"), direccion: "Calle 50 #10-20", tipoAfiliado: "Cotizante", telefono: "3134567890" },
+  { idAfiliado: "AF002", idEPS: "EPS002", nombre: "Luisa Fernández", tipoDocumento: "CC", numeroDocumento: "1023456789", fechaNacimiento: ISODate("2000-05-15"), direccion: "Carrera 40 #60-10", tipoAfiliado: "Beneficiario", telefono: "3149876543", parentesco: "Hija" }
+]);
+
+db.ordenServicio.insertMany([
+  { idOrden: "ORD001", idAfiliado: "AF001", idMedico: "MED001", idServicio: "SRV001", fechaEmision: ISODate("2025-05-20T10:00:00Z"), estado: "vigente" },
+  { idOrden: "ORD002", idAfiliado: "AF002", idMedico: "MED002", idServicio: "SRV002", fechaEmision: ISODate("2025-05-22T11:30:00Z"), estado: "vigente" }
+]);
+
+db.cita.insertMany([
+  { idCita: "CIT001", idAfilidado: "AF001", idDisponibilidad: "DISP001", fechaReserva: ISODate("2025-05-25T09:00:00Z"), estado: "agendada" },
+  { idCita: "CIT002", idAfilidado: "AF002", idDisponibilidad: "DISP002", fechaReserva: ISODate("2025-05-26T14:00:00Z"), estado: "confirmada" }
+]);
+
+db.atencionMedica.insertMany([
+  { idAtencion: "AT001", idCita: "CIT001", receta: "Paracetamol 500mg", diagnostico: "Gripe leve", fechaAtencion: ISODate("2025-06-01T08:00:00Z"), horaAtencion: "08:05" },
+  { idAtencion: "AT002", idCita: "CIT002", receta: "Lidocaína", diagnostico: "Dolor dental", fechaAtencion: ISODate("2025-06-01T13:05:00Z"), horaAtencion: "13:10" }
+]);
+
+db.enfermedad.insertMany([
+  { idEnfermedad: "ENF001", nombreEnfermedad: "Gripe", descripcion: "Infección viral leve", sintomas: "Fiebre, tos, malestar" },
+  { idEnfermedad: "ENF002", nombreEnfermedad: "Caries", descripcion: "Deterioro dental", sintomas: "Dolor de muelas, sensibilidad" }
+]);
+
+db.ipsServicio.insertMany([
+  { idIPS: "IPS001", idServicio: "SRV001" },
+  { idIPS: "IPS002", idServicio: "SRV002" }
+]);
+
+
+
+Punto 3.D)
+
+db.runCommand({
+  collMod: "EPS",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["idEPS", "nombre", "direccion", "telefono"],
+      properties: {
+        idEPS: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        direccion: { bsonType: "string" },
+        telefono: { bsonType: "string" }
+      }
+    }
+  }
+});
+
+db.runCommand({
+  collMod: "IPS",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["idIPS", "idEPS", "nombre", "NIT", "direccion", "telefono"],
+      properties: {
+        idIPS: { bsonType: "string" },
+        idEPS: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        NIT: { bsonType: "string" },
+        direccion: { bsonType: "string" },
+        telefono: { bsonType: "string" }
+      }
+    }
+  }
+});
+
+
+db.runCommand({
+  collMod: "servicioSalud",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["idServicio", "nombreServicio", "descripcion", "requisitos"],
+      properties: {
+        idServicio: { bsonType: "string" },
+        nombreServicio: { bsonType: "string" },
+        descripcion: { bsonType: "string" },
+        requisitos: { bsonType: "string" }
+      }
+    }
+  }
+});
+
+db.runCommand({
+  collMod: "medico",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["idMedico", "nombre", "tipoDocumento", "numeroDocumento", "idEspecialidad"],
+      properties: {
+        idMedico: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        tipoDocumento: { bsonType: "string" },
+        numeroDocumento: { bsonType: "string" },
+        idEspecialidad: { bsonType: "string" }
+      }
+    }
+  }
+});
+
+db.runCommand({
+  collMod: "especialidad",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["idEspecialidad", "nombre", "descripcion"],
+      properties: {
+        idEspecialidad: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        descripcion: { bsonType: "string" }
+      }
+    }
+  }
+});
+
+db.runCommand({
+  collMod: "prestacionServicio",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["idPrestacion", "idServicio", "idMédico", "idIPS", "horario", "cuposDisponibles"],
+      properties: {
+        idPrestacion: { bsonType: "string" },
+        idServicio: { bsonType: "string" },
+        idMédico: { bsonType: "string" },
+        idIPS: { bsonType: "string" },
+        horario: { bsonType: "string" },
+        cuposDisponibles: { bsonType: "int", minimum: 0 }
+      }
+    }
+  }
+});
+
+db.runCommand({
+  collMod: "disponibilidad",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["idDisponibilidad", "idPrestacion", "fechaHora", "estado"],
+      properties: {
+        idDisponibilidad: { bsonType: "string" },
+        idPrestacion: { bsonType: "string" },
+        fechaHora: { bsonType: "date" },
+        estado: { bsonType: "string" }
+      }
+    }
+  }
+});
+
+db.runCommand({
+  collMod: "Afiliado",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["idAfiliado", "idEPS", "nombre", "tipoDocumento", "numeroDocumento", "fechaNacimiento", "direccion", "tipoAfiliado", "telefono"],
+      properties: {
+        idAfiliado: { bsonType: "string" },
+        idEPS: { bsonType: "string" },
+        nombre: { bsonType: "string" },
+        tipoDocumento: { bsonType: "string" },
+        numeroDocumento: { bsonType: "string" },
+        fechaNacimiento: { bsonType: "date" },
+        direccion: { bsonType: "string" },
+        tipoAfiliado: { bsonType: "string" },
+        telefono: { bsonType: "string" },
+        parentesco: { bsonType: ["string", "null"] }
+      }
+    }
+  }
+});
+
+db.runCommand({
+  collMod: "ordenServicio",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["idOrden", "idAfiliado", "idMedico", "idServicio", "fechaEmision", "estado"],
+      properties: {
+        idOrden: { bsonType: "string" },
+        idAfiliado: { bsonType: "string" },
+        idMedico: { bsonType: "string" },
+        idServicio: { bsonType: "string" },
+        fechaEmision: { bsonType: "date" },
+        estado: { bsonType: "string" }
+      }
+    }
+  }
+});
+
+db.runCommand({
+  collMod: "cita",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["idCita", "idAfilidado", "idDisponibilidad", "fechaReserva", "estado"],
+      properties: {
+        idCita: { bsonType: "string" },
+        idAfilidado: { bsonType: "string" },
+        idDisponibilidad: { bsonType: "string" },
+        fechaReserva: { bsonType: "date" },
+        estado: { bsonType: "string" }
+      }
+    }
+  }
+});
+
+db.runCommand({
+  collMod: "atencionMedica",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["idAtencion", "idCita", "receta", "diagnostico", "fechaAtencion", "horaAtencion"],
+      properties: {
+        idAtencion: { bsonType: "string" },
+        idCita: { bsonType: "string" },
+        receta: { bsonType: "string" },
+        diagnostico: { bsonType: "string" },
+        fechaAtencion: { bsonType: "date" },
+        horaAtencion: { bsonType: "string" }
+      }
+    }
+  }
+});
+
+db.runCommand({
+  collMod: "enfermedad",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["idEnfermedad", "nombreEnfermedad", "descripcion", "sintomas"],
+      properties: {
+        idEnfermedad: { bsonType: "string" },
+        nombreEnfermedad: { bsonType: "string" },
+        descripcion: { bsonType: "string" },
+        sintomas: { bsonType: "string" }
+      }
+    }
+  }
+});
+
+db.runCommand({
+  collMod: "ipsServicio",
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["idIPS", "idServicio"],
+      properties: {
+        idIPS: { bsonType: "string" },
+        idServicio: { bsonType: "string" }
+      }
+    }
+  }
+});
